@@ -1,0 +1,24 @@
+name: monopoly_deal_server
+description: >
+  Authoritative WebSocket game server for Monopoly Deal. Runs the shared
+  rules engine (monopoly_deal_engine) and is the single source of truth
+  for game state — clients send moves, the server validates them and
+  broadcasts the resulting state to everyone in the room.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  monopoly_deal_engine:
+    path: ../engine
+  shelf: ^1.4.0
+  shelf_web_socket: ^3.0.0
+  web_socket_channel: ^3.0.0
+  args: ^2.5.0
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0
+  async: ^2.11.0

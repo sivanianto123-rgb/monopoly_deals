@@ -9,9 +9,9 @@ A Monopoly Deal app for iOS and Android with online multiplayer.
   Shared by both the client and the server so the rules only exist in one
   place.
 - **`app/`** — Flutter client (iOS + Android), not started yet.
-- **`server/`** — Dart backend (matchmaking, authoritative game state,
-  realtime sync over WebSocket), not started yet. Depends on `engine/` as
-  a path dependency, same as `app/` will.
+- **`server/`** — Dart WebSocket backend (room/lobby management,
+  authoritative game state, move validation). Depends on `engine/` as a
+  path dependency, same as `app/` will.
 
 Using Dart end-to-end (engine + server) means the client and server never
 have two separate reimplementations of the rules to keep in sync.
@@ -35,18 +35,31 @@ Built so far, in `engine/`:
   back to surrendering properties, including "give everything you have"
   when the payer can't fully cover it). `endTurn()` refuses to run while
   anything is still pending.
-- 35 passing tests, clean `dart analyze`.
+- JSON serialization (`cardToJson`/`cardFromJson`, `gameStateToJson`) with
+  a per-viewer game state view that hides other players' hand contents.
+- 38 passing tests, clean `dart analyze`.
+
+Built so far, in `server/`:
+- A room/lobby system (create/join by code, 2-5 players) and a WebSocket
+  protocol that maps 1:1 onto the engine's `TurnEngine` methods — the
+  server is authoritative, validates every move, and broadcasts a
+  per-player `gameState` after each one. See `server/README.md` for the
+  full protocol.
+- 3 end-to-end integration tests driving the real server over real
+  `WebSocketChannel` connections (create/join/start/play/end-turn, illegal
+  moves getting rejected to just the sender, and a full Rent-card-vs-Just-
+  Say-No exchange).
 
 Not yet implemented:
-- Networking/server, matchmaking, auth.
+- Reconnect/resume, persistence, auth — see "Known gaps" in
+  `server/README.md`.
 - Flutter UI.
 
-## Running the engine tests
+## Running the tests
 
 ```sh
-cd engine
-dart pub get
-dart test
+cd engine && dart pub get && dart test
+cd ../server && dart pub get && dart test
 ```
 
 ## Deck reference
