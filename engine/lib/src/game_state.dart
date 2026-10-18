@@ -1,6 +1,7 @@
 import 'dart:math' show Random;
 
 import 'cards.dart';
+import 'pending_action.dart';
 
 export 'dart:math' show Random;
 
@@ -70,6 +71,15 @@ class GameState {
   /// are handled separately once action resolution is implemented.
   int actionsPlayedThisTurn = 0;
 
+  /// Action cards played against another player, awaiting a Just Say No
+  /// response (or acceptance) before they take effect. Processed FIFO:
+  /// index 0 is the one currently open for response.
+  final List<PendingAction> pendingActions = [];
+
+  /// Debts that have resolved (not cancelled) and are waiting on the payer
+  /// to hand over cards via [TurnEngine.resolvePayment].
+  final List<PendingPayment> pendingPayments = [];
+
   static const maxActionsPerTurn = 3;
   static const maxHandSize = 7;
   static const cardsDrawnPerTurn = 2;
@@ -77,6 +87,11 @@ class GameState {
   GameState({required this.players, required this.drawPile});
 
   Player get currentPlayer => players[currentPlayerIndex];
+
+  Player playerById(String id) => players.firstWhere(
+        (p) => p.id == id,
+        orElse: () => throw ArgumentError('No player with id $id'),
+      );
 
   Player? get winner {
     for (final p in players) {
