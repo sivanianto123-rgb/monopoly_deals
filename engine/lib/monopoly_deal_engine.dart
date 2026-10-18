@@ -5,3 +5,5 @@ export 'src/cards.dart';
 export 'src/deck.dart';
 export 'src/engine.dart';
 export 'src/game_state.dart';
+export 'src/pending_action.dart';
+export 'src/serialization.dart';
