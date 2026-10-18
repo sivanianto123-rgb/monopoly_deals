@@ -8,7 +8,7 @@ A Monopoly Deal app for iOS and Android with online multiplayer.
   game state, turn logic, action-card effects). No UI, no networking.
   Shared by both the client and the server so the rules only exist in one
   place.
-- **`app/`** — Flutter client (iOS + Android), not started yet.
+- **`app/`** — Flutter client (iOS + Android).
 - **`server/`** — Dart WebSocket backend (room/lobby management,
   authoritative game state, move validation). Depends on `engine/` as a
   path dependency, same as `app/` will.
@@ -50,17 +50,59 @@ Built so far, in `server/`:
   moves getting rejected to just the sender, and a full Rent-card-vs-Just-
   Say-No exchange).
 
+Built so far, in `app/`:
+- A Flutter client (iOS + Android project scaffolding) using `provider`
+  for state management and `web_socket_channel` to speak the server's
+  protocol directly — no mocking layer, it's the same wire format
+  `server/README.md` documents.
+- Screens: connect (pick a server, create/join a room), lobby (player
+  list, start game), and the game table (hand, property sets grouped by
+  color with house/hotel indicators, opponents' hand counts and bank
+  totals, draw/discard piles, turn indicator).
+- Card rendering for all 5 card kinds (money, property, property
+  wildcard, rent, action), visually distinct the way the physical cards
+  are.
+- A full play/response flow: tapping a card in hand offers the moves that
+  make sense for it (bank it, place it, or its special action), including
+  nested pickers for actions that need a target player/property/color
+  (Sly Deal, Forced Deal, Deal Breaker, Rent + Double The Rent, Debt
+  Collector, It's My Birthday, House/Hotel). Pending actions targeting you
+  surface a Just-Say-No-or-accept banner; a pending payment you owe opens
+  a card picker (bank first, properties if needed) before it'll let you
+  confirm.
+- 9 passing tests (widget + model-parsing), clean `flutter analyze`.
+- Verified end-to-end in a real browser (via a Flutter web build used only
+  for this local check — the shipped app targets iOS/Android) against the
+  real server: two simulated players connect, create/join a room, see the
+  lobby update live, start a game, see their own hand in full and the
+  other player's hand as a count only, draw, and end their turn with the
+  turn correctly rotating.
+
 Not yet implemented:
 - Reconnect/resume, persistence, auth — see "Known gaps" in
   `server/README.md`.
-- Flutter UI.
+- Haven't built/run on an actual iOS or Android device or emulator (this
+  environment has neither Xcode nor the Android SDK) — the widget tests,
+  `flutter analyze`, and the browser-based end-to-end check are what's
+  been verified so far.
 
 ## Running the tests
 
 ```sh
 cd engine && dart pub get && dart test
 cd ../server && dart pub get && dart test
+cd ../app && flutter pub get && flutter analyze && flutter test
 ```
+
+## Running the app
+
+```sh
+cd server && dart pub get && dart run bin/server.dart --port 8080
+# in another terminal, on a device/simulator with the Flutter SDK installed:
+cd app && flutter pub get && flutter run
+```
+Enter the server's address (e.g. `localhost:8080`, or your machine's LAN
+IP if running on a physical device) on the connect screen.
 
 ## Deck reference
 
