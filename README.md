@@ -26,11 +26,18 @@ Built so far, in `engine/`:
 - Basic turn flow: deal, draw 2, play up to 3 cards/turn (to bank or to a
   property set), move wildcards between colors, discard to the 7-card hand
   limit, win detection (3 complete property sets).
+- All 10 action card effects: Pass Go, House, Hotel (instant); Sly Deal,
+  Forced Deal, Deal Breaker, Debt Collector, It's My Birthday, Rent (+
+  Double The Rent) go through a `PendingAction` queue so the target can
+  respond with Just Say No (chainable — the original player can counter)
+  before anything resolves. Debt Collector/Birthday/Rent turn into a
+  `PendingPayment`, settled via `resolvePayment` (bank cards first, falling
+  back to surrendering properties, including "give everything you have"
+  when the payer can't fully cover it). `endTurn()` refuses to run while
+  anything is still pending.
+- 35 passing tests, clean `dart analyze`.
 
 Not yet implemented:
-- Action card *effects* (Sly Deal, Forced Deal, Deal Breaker, Debt
-  Collector, It's My Birthday, Pass Go, House/Hotel rent bonus, Rent
-  collection, Double The Rent, Just Say No responses).
 - Networking/server, matchmaking, auth.
 - Flutter UI.
 
